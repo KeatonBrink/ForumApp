@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum App</title>
+  </head>
+  <body>
+    <div id="app">
+      <div v-show="curPage == 1">
+        <h1>Please Login</h1>
+        <input type="text" placeholder="Email" v-model="loginEmail" />
+        <br />
+        <input type="text" placeholder="Password" v-model="loginPassWord" />
+        <br />
+        <button v-on:click="submitLoginData()">Login!</button>
+        <button v-on:click="curPage = 2">Create New User</button>
+      </div>
+      <div v-show="curPage == 2">
+        <h1>Please Create New Login</h1>
+        <input type="text" placeholder="Full Name" v-model="newFullName" />
+        <br />
+        <input type="text" placeholder="Email" v-model="newEmail" />
+        <br />
+        <input type="text" placeholder="Password" v-model="newPassWord" />
+        <br />
+        <button v-on:click="submitNewData()">Create Account</button>
+      </div>
+      <div v-show="curPage == 3">
+        <h1>Congrats, {{loginEmail}}, you are logged in!</h1>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
