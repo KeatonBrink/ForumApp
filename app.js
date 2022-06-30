@@ -13,6 +13,11 @@ var app = new Vue({
         curPage: 1,
         loginFailed: 0,
         creationFailed: 0,
+        threads: [],
+        threadPosts: [],
+        newThreadName: "",
+        newDescription: "",
+        newCategory: "",
     },
     methods: {
         //functions here
@@ -30,6 +35,7 @@ var app = new Vue({
                 let data = await response.json()
                 console.log(data);
                 this.curPage = 3;
+                this.getThreads();
             } else if (response.status == 401) {
                 //Not logged in
                 console.log ("Not logged in")
@@ -117,6 +123,73 @@ var app = new Vue({
                 this.creationFailed = 0;
             }
         },
+
+        //GET threads
+        getThreads: async function () {
+            // console.log(this.newEmail.slice(this.newEmail.length - 4));
+            let response = await fetch(URL + "/thread", {
+                //Never put body in get request
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+            
+            //Parse response data
+            let body = await response.json();
+            console.log(body);  
+            console.log(response);
+
+            //Check for successful creation
+            if (response.status == 200) {
+                //Succesful creation
+                this.threads = body;
+                console.log("Successful thread get");
+                this.curPage = 3;
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful get threads")
+            } else {
+                console.log("Some sort of error when GET /thread");
+            }
+        },
+        //GET thread posts
+        getThreadPosts: async function (threadID) {
+            console.log(threadID);
+            let response = await fetch(URL + "/thread/" + threadID, {
+                //Never put body in get request
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+            
+            //Parse response data
+            let body = await response.json();
+            console.log(body);  
+            console.log(response);
+
+            //Check for successful creation
+            if (response.status == 200) {
+                //Succesful creation
+                this.threadPosts = body;
+                console.log("Successful thread get");
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful get threads")
+            } else {
+                console.log("Some sort of error when GET /thread");
+            }
+        },
+
+        //Post user thread
+        postThread: function () {
+            if (this.newThreadName == "" || this.newDescription == "" || this.newCategory == "") {
+                return;
+            }
+
+        },
+
         emptyFields: function () {
             if ((this.newEmail == "" || this.newFullName == "" || this.newPassWord == "") && (this.loginEmail == "" || this.loginPassWord == "")) {
                 this.hasEmptyField = 1;
@@ -133,3 +206,23 @@ var app = new Vue({
         this.getSession();
       }
 });
+
+Vue.component('full-thread', {
+    template: `
+    <div>
+        <br />
+            <h2>{{thread.name}}</h2>
+            <h4>{{thread.description}}</h4>
+            <h5>By: {{thread.user.fullname}}
+        <br/>
+    </div>
+    `,
+    props: [
+        "thread"
+    ],
+    methods: {
+        deleteAddress: function (dIndex) {
+            this.alist.splice(dIndex, 1); 
+        }
+    }
+})

@@ -34,7 +34,32 @@
       </div>
       <div v-show="hasEmptyField">Please check that no fields are empty</div>
       <div v-show="curPage == 3">
-        <h1>Congrats, you are logged in!</h1>
+        <h1>Welcome, enjoy the forum!</h1>
+        <div v-for="thread in threads">
+          <br />
+          <h2>{{thread.name}}</h2>
+          <h4>{{thread.description}}</h4>
+          <h5>By: {{thread.user.fullname}}</h5>
+          <button v-on:click="curPage = 4; getThreadPosts(thread._id)">
+            Open this Thread!
+          </button>
+          <br />
+        </div>
+        <button v-on:click="curPage = 5">Create New Thread</button>
+      </div>
+      <div v-show="curPage == 4">
+        {{threadPosts.name}}
+        <div v-for="post in threadPosts.posts">
+          {{post.user.fullname}} said: <br />
+          {{post.body}}<br />
+        </div>
+        <button v-on:click="curPage = 3">Return to Threads</button>
+      </div>
+      <div v-show="curPage == 5">
+        <input placeholder="New Thread Name" v-model="newThreadName" />
+        <input placeholder="Thread Description" v-model="newDescription" />
+        <input placeholder="Thread Category" v-model="newCategory" />
+        <button v-on:click="postThread()">Submit Thread</button>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
