@@ -43,6 +43,7 @@
           <button v-on:click="curPage = 4; getThreadPosts(thread._id)">
             Open this Thread!
           </button>
+          <button v-on:click="delThread(thread._id)">Delete!</button>
           <br />
         </div>
         <button v-on:click="curPage = 5">Create New Thread</button>
@@ -52,7 +53,18 @@
         <div v-for="post in threadPosts.posts">
           {{post.user.fullname}} said: <br />
           {{post.body}}<br />
+          <button v-on:click="delThreadPost(threadPosts._id, post._id)">
+            Delete Post
+          </button>
+          <br />
+          <br />
         </div>
+        <h3>Create new post!</h3>
+        <input v-model="newPost" placeholder="Post Content" />
+        <button v-on:click="postThreadPost(threadPosts._id)">
+          Create Post
+        </button>
+        <div v-show="hasFailedPost">Post was not created</div>
         <button v-on:click="curPage = 3">Return to Threads</button>
       </div>
       <div v-show="curPage == 5">
@@ -60,6 +72,7 @@
         <input placeholder="Thread Description" v-model="newDescription" />
         <input placeholder="Thread Category" v-model="newCategory" />
         <button v-on:click="postThread()">Submit Thread</button>
+        <h3 v-show="hasFailedThread">Thread failed to be created</h3>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>

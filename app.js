@@ -13,11 +13,14 @@ var app = new Vue({
         curPage: 1,
         loginFailed: 0,
         creationFailed: 0,
+        hasFailedThread: 0,
         threads: [],
         threadPosts: [],
         newThreadName: "",
         newDescription: "",
         newCategory: "",
+        newPost: "",
+        hasFailedPost: 0,
     },
     methods: {
         //functions here
@@ -62,9 +65,7 @@ var app = new Vue({
             });
 
             //Parse response data
-            let body = response.json();
-            console.log(body);  
-            console.log(response);
+            let body = await response.json();
 
             //Check for successful login
             if (response.status == 201) {
@@ -74,6 +75,7 @@ var app = new Vue({
                 this.loginPassWord = "";
                 this.loginEmail = "";
                 this.curPage = 3;
+                getThreads();
             } else if (response.status == 401) {
                 this.loginFailed = 1;
                 console.log ("Unsuccesful login attempt")
@@ -84,7 +86,6 @@ var app = new Vue({
             }
         },
         postUser: async function () {
-            // console.log(this.newEmail.slice(this.newEmail.length - 4));
             this.emptyFields();
             let User = {
                 username: this.newEmail, 
@@ -99,11 +100,9 @@ var app = new Vue({
                 },
                 credentials: "include"
             });
-            
+
             //Parse response data
-            let body = response.json();
-            console.log(body);  
-            console.log(response);
+            let body = await response.json();
 
             //Check for successful creation
             if (response.status == 201) {
@@ -126,7 +125,6 @@ var app = new Vue({
 
         //GET threads
         getThreads: async function () {
-            // console.log(this.newEmail.slice(this.newEmail.length - 4));
             let response = await fetch(URL + "/thread", {
                 //Never put body in get request
                 method: "GET",
@@ -153,9 +151,10 @@ var app = new Vue({
                 console.log("Some sort of error when GET /thread");
             }
         },
+
+
         //GET thread posts
         getThreadPosts: async function (threadID) {
-            console.log(threadID);
             let response = await fetch(URL + "/thread/" + threadID, {
                 //Never put body in get request
                 method: "GET",
@@ -167,8 +166,6 @@ var app = new Vue({
             
             //Parse response data
             let body = await response.json();
-            console.log(body);  
-            console.log(response);
 
             //Check for successful creation
             if (response.status == 200) {
@@ -182,12 +179,133 @@ var app = new Vue({
             }
         },
 
+
         //Post user thread
-        postThread: function () {
+        postThread: async function () {
             if (this.newThreadName == "" || this.newDescription == "" || this.newCategory == "") {
+                this.hasFailedThread = 1;
+                return;
+            }
+            let Thread = {
+                name: this.newThreadName, 
+                description: this.newDescription,
+                category: this.newCategory
+            };
+            let response = await fetch(URL + "/thread", {
+                method: "POST",
+                body: JSON.stringify(Thread),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+
+            //Parse response data
+            let body = await response.json();
+
+            //Check for successful creation
+            if (response.status >= 200 && response.status < 300) {
+                //Succesful creation
+                this.curPage = 3;
+                this.hasFailedThread = 0;
+                this.newCategory = "";
+                this.newDescription = "";
+                this.newThreadName = "";
+                console.log("Successful user attempt");
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful user creation attempt")
+                this.hasFailedThread = 1;
+            } else {
+                console.log("Some sort of error when POST /user");
+            }
+        },
+
+        delThread: async function (threadID) {
+            let response = await fetch(URL + "/thread/" + threadID, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+
+            //Parse response data
+            let body = await response.json();
+
+            //Check for successful creation
+            if (response.status >= 200 && response.status < 300) {
+                //Succesful creation
+                console.log("Successful thread delete");
+                this.getThreads();
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful thread delete")
+            } else {
+                console.log("Some sort of error when DELETE /thread/ID");
+            }
+        },
+
+        postThreadPost: async function (threadID) {
+            console.log("Thread ID in postThreadPost()", threadID);
+
+            if (this.newPost == "") {
+                console.log("Post entry is blank")
+                this.hasFailedPost = 1;
                 return;
             }
 
+            let Post = {
+                "body": this.newPost,
+                "thread_id": this.threadID
+            }
+            let response = await fetch(URL + "/post", {
+                method: "POST",
+                body: JSON.stringify(Post),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+
+            //Parse response data
+            let body = await response.json();
+            console.log("Body of postThreadPost: ", body);
+
+            //Check for successful creation
+            if (response.status >= 200 && response.status < 300) {
+                //Succesful creation
+                this.curPage = 4;
+                this.hasFailedPost = 0;
+                this.newPost= "";
+                this.getThreadPosts(threadID);
+                console.log("Successful user attempt");
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful user post post")
+                this.hasFailedPost = 1;
+            } else {
+                console.log("Some sort of error when POST /user");
+                this.hasFailedPost = 1;
+            }
+        },
+
+        delThreadPost: async function (threadID, postID) {
+            let response = await fetch(URL + "/thread/" + threadID + "/post/" + postID, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+
+            //Check for successful creation
+            if (response.status >= 200 && response.status < 300) {
+                //Succesful creation
+                console.log("Successful post delete");
+                this.getThreads();
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful post delete")
+            } else {
+                console.log("Some sort of error when DELETE /thread/threadID/postID");
+            }
         },
 
         emptyFields: function () {
