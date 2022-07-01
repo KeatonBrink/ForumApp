@@ -211,6 +211,7 @@ var app = new Vue({
                 this.newCategory = "";
                 this.newDescription = "";
                 this.newThreadName = "";
+                this.getThreads();
                 console.log("Successful user attempt");
             } else if (response.status >= 400) {
                 console.log ("Unsuccesful user creation attempt")
@@ -255,7 +256,7 @@ var app = new Vue({
 
             let Post = {
                 "body": this.newPost,
-                "thread_id": this.threadID
+                "thread_id": threadID
             }
             let response = await fetch(URL + "/post", {
                 method: "POST",
@@ -300,6 +301,7 @@ var app = new Vue({
             if (response.status >= 200 && response.status < 300) {
                 //Succesful creation
                 console.log("Successful post delete");
+                this.getThreadPosts(threadID);
                 this.getThreads();
             } else if (response.status >= 400) {
                 console.log ("Unsuccesful post delete")
