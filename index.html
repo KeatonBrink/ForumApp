@@ -6,73 +6,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Forum App</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="app">
-      <div v-show="curPage == 1">
-        <h1>Please Login</h1>
-        <input type="text" placeholder="Email" v-model="loginEmail" />
-        <br />
-        <input type="password" placeholder="Password" v-model="loginPassWord" />
-        <br />
-        <button v-on:click="postSession()">Login!</button>
-        <button v-on:click="changePage()">Create New User</button>
-        <div v-show="loginFailed == 1">
-          Login Failed, better luck next time.
+      <div id="page-format">
+        <div id="info-block">
+          <div id="my-header">
+            <h2>{{forumName}}</h2>
+            <button
+              id="new-sign-in"
+              v-show="curPage > 2"
+              v-on:click="curPage=1"
+            >
+              Logout
+            </button>
+          </div>
+          <div v-show="curPage == 1">
+            <h1>Please Login</h1>
+            <input type="text" placeholder="Email" v-model="loginEmail" />
+            <br />
+            <input
+              type="password"
+              placeholder="Password"
+              v-model="loginPassWord"
+            />
+            <br />
+            <button v-on:click="postSession()">Login!</button>
+            <button v-on:click="changePage()">Create New User</button>
+            <div v-show="loginFailed == 1">
+              Login Failed, better luck next time.
+            </div>
+          </div>
+          <div v-show="curPage == 2">
+            <h1>Please Create New Login</h1>
+            <input type="text" placeholder="Full Name" v-model="newFullName" />
+            <br />
+            <input type="text" placeholder="Email" v-model="newEmail" />
+            <br />
+            <input
+              type="password"
+              placeholder="Password"
+              v-model="newPassWord"
+            />
+            <br />
+            <button v-on:click="postUser()">Create Account</button>
+            <div v-show="creationFailed == 1">
+              Please check that email is valid
+            </div>
+          </div>
+          <div v-show="hasEmptyField">
+            Please check that no fields are empty
+          </div>
+          <div v-show="curPage == 3">
+            <h1>Welcome, enjoy the forum!</h1>
+            <div v-for="(thread, i) in threads">
+              <div class="thread-list-item" v-show="i != 0"></div>
+              <h2>{{thread.name}}</h2>
+              <h4>{{thread.description}}</h4>
+              <h5>By: {{thread.user.fullname}}</h5>
+              <button v-on:click="curPage = 4; getThreadPosts(thread._id)">
+                Open this Thread!
+              </button>
+              <button v-on:click="delThread(thread._id)">Delete!</button>
+              <br />
+              <br />
+              <div
+                class="thread-list-item"
+                v-show="i != (threads.length - 1)"
+              ></div>
+            </div>
+            <button
+              class="create-thread"
+              v-on:click="curPage = 5; window.scrollTo(0,0)"
+            >
+              Create New Thread
+            </button>
+          </div>
+          <div v-show="curPage == 4">
+            {{threadPosts.name}}
+            <div v-for="post in threadPosts.posts">
+              {{post.user.fullname}} said: <br />
+              {{post.body}}<br />
+              <button v-on:click="delThreadPost(threadPosts._id, post._id)">
+                Delete Post
+              </button>
+              <br />
+              <br />
+            </div>
+            <h3>Create new post!</h3>
+            <input v-model="newPost" placeholder="Post Content" />
+            <button v-on:click="postThreadPost(threadPosts._id)">
+              Create Post
+            </button>
+            <div v-show="hasFailedPost">Post was not created</div>
+            <button v-on:click="curPage = 3">Return to Threads</button>
+          </div>
+          <div v-show="curPage == 5">
+            <h2>Thread Creation</h2>
+            <br />
+            <input placeholder="Thread Name" v-model="newThreadName" />
+            <input placeholder="Thread Description" v-model="newDescription" />
+            <input placeholder="Thread Category" v-model="newCategory" />
+            <br />
+            <br />
+            <button v-on:click="postThread()">Submit Thread</button>
+            <h3 v-show="hasFailedThread">Thread failed to be created</h3>
+          </div>
         </div>
-      </div>
-      <div v-show="curPage == 2">
-        <h1>Please Create New Login</h1>
-        <input type="text" placeholder="Full Name" v-model="newFullName" />
-        <br />
-        <input type="text" placeholder="Email" v-model="newEmail" />
-        <br />
-        <input type="password" placeholder="Password" v-model="newPassWord" />
-        <br />
-        <button v-on:click="postUser()">Create Account</button>
-        <div v-show="creationFailed == 1">Please check that email is valid</div>
-      </div>
-      <div v-show="hasEmptyField">Please check that no fields are empty</div>
-      <div v-show="curPage == 3">
-        <h1>Welcome, enjoy the forum!</h1>
-        <div v-for="thread in threads">
-          <br />
-          <h2>{{thread.name}}</h2>
-          <h4>{{thread.description}}</h4>
-          <h5>By: {{thread.user.fullname}}</h5>
-          <button v-on:click="curPage = 4; getThreadPosts(thread._id)">
-            Open this Thread!
-          </button>
-          <button v-on:click="delThread(thread._id)">Delete!</button>
-          <br />
-        </div>
-        <button v-on:click="curPage = 5">Create New Thread</button>
-      </div>
-      <div v-show="curPage == 4">
-        {{threadPosts.name}}
-        <div v-for="post in threadPosts.posts">
-          {{post.user.fullname}} said: <br />
-          {{post.body}}<br />
-          <button v-on:click="delThreadPost(threadPosts._id, post._id)">
-            Delete Post
-          </button>
-          <br />
-          <br />
-        </div>
-        <h3>Create new post!</h3>
-        <input v-model="newPost" placeholder="Post Content" />
-        <button v-on:click="postThreadPost(threadPosts._id)">
-          Create Post
-        </button>
-        <div v-show="hasFailedPost">Post was not created</div>
-        <button v-on:click="curPage = 3">Return to Threads</button>
-      </div>
-      <div v-show="curPage == 5">
-        <input placeholder="New Thread Name" v-model="newThreadName" />
-        <input placeholder="Thread Description" v-model="newDescription" />
-        <input placeholder="Thread Category" v-model="newCategory" />
-        <button v-on:click="postThread()">Submit Thread</button>
-        <h3 v-show="hasFailedThread">Thread failed to be created</h3>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>

@@ -1,3 +1,43 @@
 * {
     text-align: center;
+    margin: 0px;
+    font-family: 'Anek Malayalam', sans-serif;
+}
+
+button {
+    border-radius: 10px;
+    /* border: none; */
+    background-color:rgb(66, 156, 126);
+}
+
+#page-format {
+    display: grid;
+    min-height: 750px;
+    grid-template-columns: 10% 80% 10%;
+    grid-template-rows: auto;
+    background-color: aquamarine;
+}
+
+#info-block {
+    grid-column: 2/3;
+    background-color: rgb(66, 156, 126);
+    border-radius: 7.5%;
+    padding: 20px;
+}
+
+.thread-list-item {
+    border-top: solid rgb(21, 20, 20);
+    border-bottom: solid rgb(21, 20, 20);
+}
+
+.create-thread {
+    width: 30%;
+    height: 30px;
+    border-top: solid rgb(21, 20, 20);
+}
+
+#my-header {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
 }

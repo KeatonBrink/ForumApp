@@ -21,6 +21,7 @@ var app = new Vue({
         newCategory: "",
         newPost: "",
         hasFailedPost: 0,
+        forumName: "ForumFront",
     },
     methods: {
         //functions here
@@ -75,7 +76,7 @@ var app = new Vue({
                 this.loginPassWord = "";
                 this.loginEmail = "";
                 this.curPage = 3;
-                getThreads();
+                this.getThreads();
             } else if (response.status == 401) {
                 this.loginFailed = 1;
                 console.log ("Unsuccesful login attempt")
@@ -108,6 +109,7 @@ var app = new Vue({
             if (response.status == 201) {
                 //Succesful creation
                 this.curPage = 1;
+                this.getThreads();
                 console.log("Successful user attempt");
             } else if (response.status >= 400) {
                 console.log ("Unsuccesful user creation attempt")
