@@ -1,4 +1,8 @@
+//Jace's api
 const URL = "https://forum2022.codeschool.cloud";
+
+//My local server url
+//const URL = "localhost:8080"
 
 var app = new Vue({
     el: "#app",
