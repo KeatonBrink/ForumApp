@@ -64,9 +64,14 @@ app.get("/thread", async (req, res) => {
         // res.json(threads);
     } catch(err) {
         console.log("Could not get threads. Error: ", err);
+        res.status(500).json({
+            message:"list request unfullfilled",
+            error: err,
+        });
     }
     for (let i in threads) {
         try {
+            console.log(i);
             threads[i] = threads[i].toObject();
             threads[i].user = await User.findById(threads[i].user_id, "-password");
         } catch(err) {
