@@ -4,6 +4,12 @@ const setUpAuth = require("./auth");
 const setUpSession = require("./session");
 const app = express();
 
+/*
+Check authenticated
+Check authorized
+Perform action
+*/
+
 //Tell your server to understand how to handle json
 app.use(express.json());
 
@@ -135,11 +141,13 @@ app.get("/thread/:id", async (req, res) => {
 
 app.delete("/thread/:id", async (req, res) => {
     let threadID = req.params.id;
+    //Check authentication
     if(!req.user) {
         res.status(403).json({message: "unauthorized"});
         return;
     }
     let thread
+    //Find thread
     try {
         thread = await Thread.findById(threadID);
         if (!thread) {
@@ -156,12 +164,14 @@ app.delete("/thread/:id", async (req, res) => {
         return;
     }
 
+    //Check ownership
     let threadUserId = thread.user_id
     if (threadUserId != req.user.id) {
         res.status(403).json({message: "unauthorized"});
         return;
     }
 
+    //Delete thread
     try {
         thread = await Thread.findByIdAndDelete(threadID);
         if (!thread) {
@@ -221,6 +231,102 @@ app.post("/post", async (req, res) => {
     }
     res.status(200).json(thread.posts)
 })
+
+app.delete("/thread/:threadid/post/:postid", async (req, res) => {
+    let threadID = req.params.threadid;
+    let postID = req.params.postid;
+    //Check authentication
+    if(!req.user) {
+        res.status(403).json({message: "unauthorized"});
+        return;
+    }
+
+    let thread;
+    //Find thread
+    try {
+        thread = await Thread.findById(threadID);
+        if (!thread) {
+            res.status(404).json({
+                message: "Thread could not be found",
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "Error finding thread",
+            error: err,
+        })
+        return;
+    }
+    let index = -1;
+    let post;
+    let postUser;
+    for (let i in thread.posts) {
+        // console.log(thread.posts[i]._id, " ", postID)
+        try {
+            postUser = await User.findById(thread.posts[i].user_id);
+        } catch(err) {
+            res.status(500).json({
+                message: "Error finding post on thread",
+                error: err,
+            })
+            return;
+        }
+        if (thread.posts[i]._id == postID && req.user.username == postUser.username) {
+            post = thread.posts[i];
+            index = i;
+        }
+    }
+    if (index == -1) {
+        res.status(404).json({
+            message: "Post could not be found"
+        })
+        return;
+    }
+
+    let delThread;
+    try {
+        delThread = await Thread.findByIdAndUpdate(threadID, {
+            $pull: {
+                posts: {
+                    _id: postID,
+                }
+            },
+        },
+        {
+            new: true,
+        }
+        )
+    } catch(err) {
+        res.status(500).json({
+            message: "Could not find and delete",
+            error: err,
+        })
+        return;
+    }
+
+    // delThread = delThread.toObject;
+    res.status(200).json(delThread);
+
+    //Alternative code to the above code, much simpler, but less specific
+//     try {
+//         thread = await Thread.findOne({
+//             _id: threadID,
+//             "posts._id": postID,
+//         })
+//     } catch(err) {
+//         res.status(500).json({
+//             message: "Post could not be found",
+//             error: err,
+//         })
+//     }
+
+//     try {
+        
+//     }
+// }) 
+})
+
 
 
 module.exports = app;
