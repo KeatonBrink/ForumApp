@@ -53,6 +53,7 @@ var app = new Vue({
                 console.log("Some sort of error when GET /session: ", response.status, response);
             }
         },
+
         //POST /session - Attempt to login
         postSession: async function () {
             this.emptyFields();
@@ -90,6 +91,7 @@ var app = new Vue({
                 console.log("Some sort of error when POST /session");
             }
         },
+
         postUser: async function () {
             this.emptyFields();
             let User = {
@@ -159,7 +161,6 @@ var app = new Vue({
             }
         },
 
-
         //GET thread posts
         getThreadPosts: async function (threadID) {
             let response = await fetch(URL + "/thread/" + threadID, {
@@ -185,7 +186,6 @@ var app = new Vue({
                 console.log("Some sort of error when GET /thread");
             }
         },
-
 
         //Post user thread
         postThread: async function () {
@@ -322,6 +322,7 @@ var app = new Vue({
                 this.hasEmptyField = 1;
             }
         },
+
         changePage: function () {
             if (this.curPage == 1){
                 this.hasEmptyField = 0;
@@ -329,6 +330,7 @@ var app = new Vue({
             }
         }
     },
+    
     created: function () {
         this.getSession();
       }
