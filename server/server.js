@@ -29,6 +29,7 @@ app.post("/user", async (req, res) => {
             message: `post request failed, create better user`,
             error: err,
         });
+        return;
     }
 });
 
@@ -48,6 +49,7 @@ app.post("/thread", async (req, res) => {
     } catch (err) {
         res.status(500).json({message: "could not create thread", error: err,})
     }
+    return;
 })
 
 app.get("/thread", async (req, res) => {
@@ -68,6 +70,7 @@ app.get("/thread", async (req, res) => {
             message:"list request unfullfilled",
             error: err,
         });
+        return;
     }
     for (let i in threads) {
         try {
@@ -76,22 +79,92 @@ app.get("/thread", async (req, res) => {
             threads[i].user = await User.findById(threads[i].user_id, "-password");
         } catch(err) {
             console.log("Error with get thread: ", err);
+            return;
         }
     }
 
     res.status(200).json(threads)
 })
 
-app.get("/thread/:id", (req, res) => {
+app.get("/thread/:id", async (req, res) => {
+    let threadID = req.params.id
+    let threadPosts;
 
-})
+    try {
+        threadPosts = await Thread.findById(threadID)
+        if (!threadPosts) {
+            res.status(404).json({
+                message: "Could not find thread",
+            });
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message:"Could not find specific thread",
+            error: err,
+        });
+        return;
+    }
+
+
+    try {
+        threadPosts = threadPosts.toObject();
+        threadPosts.user = await User.findById(threadPosts.user_id, "-password");
+        // console.log("Username: ", threadPosts.user);
+    } catch(err) {
+        res.status(500).json({
+            message:"Could not find user ID",
+            error: err,
+        });
+        return;
+    }
+    //Add posts and such
+    res.status(200).json(threadPosts);
+});
 
 app.delete("/thread/:id", (req, res) => {
-
+    let threadID = req.params.id;
 })
 
-app.post("/post", (req, res) => {
+app.post("/post", async (req, res) => {
+    if (!req.user) {
+        res.status(401).json({message: "Unauthorized"});
+        return;
+    }
+    let thread;
 
+    try {
+        thread = await Thread.findByIdAndUpdate(
+            req.body.thread_id,
+            {
+                $push: {
+                    posts: {
+                        user_id: req.user.id,
+                        body: req.body.body,
+                        thread_id: req.body.thread_id,
+                    },
+                }
+            },
+
+            //Return after changes are made
+            {
+                new: true,
+            }
+        )
+        if (!thread) {
+            res.status(404).json({
+                message: "Thread not found"
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "failed to insert post",
+            error: err
+        })
+        return;
+    }
+    res.status(200).json(thread.posts)
 })
 
 
