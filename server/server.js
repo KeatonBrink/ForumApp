@@ -135,6 +135,11 @@ app.get("/thread/:id", async (req, res) => {
 
 app.delete("/thread/:id", (req, res) => {
     let threadID = req.params.id;
+    if(!req.user) {
+        res.status(401).json({message: "unauthorized"});
+        return;
+    }
+    let thread
 })
 
 app.post("/post", async (req, res) => {
