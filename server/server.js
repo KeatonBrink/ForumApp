@@ -74,7 +74,7 @@ app.get("/thread", async (req, res) => {
     }
     for (let i in threads) {
         try {
-            console.log(i);
+            // console.log(i);
             threads[i] = threads[i].toObject();
             threads[i].user = await User.findById(threads[i].user_id, "-password");
         } catch(err) {
@@ -119,6 +119,17 @@ app.get("/thread/:id", async (req, res) => {
         return;
     }
     //Add posts and such
+
+    try {
+        for (let i in threadPosts.posts){
+            threadPosts.posts[i].user = await User.findById(threadPosts.posts[i].user_id, "-password")
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "Could not find post user ID",
+            error: err,
+        })
+    }
     res.status(200).json(threadPosts);
 });
 
