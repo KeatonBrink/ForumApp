@@ -133,13 +133,52 @@ app.get("/thread/:id", async (req, res) => {
     res.status(200).json(threadPosts);
 });
 
-app.delete("/thread/:id", (req, res) => {
+app.delete("/thread/:id", async (req, res) => {
     let threadID = req.params.id;
     if(!req.user) {
-        res.status(401).json({message: "unauthorized"});
+        res.status(403).json({message: "unauthorized"});
         return;
     }
     let thread
+    try {
+        thread = await Thread.findById(threadID);
+        if (!thread) {
+            res.status(404).json({
+                message: "Thread could not be found",
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "Error finding thread",
+            error: err,
+        })
+        return;
+    }
+
+    let threadUserId = thread.user_id
+    if (threadUserId != req.user.id) {
+        res.status(403).json({message: "unauthorized"});
+        return;
+    }
+
+    try {
+        thread = await Thread.findByIdAndDelete(threadID);
+        if (!thread) {
+            res.status(404).json({
+                message: "Thread could not be found",
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "Error finding thread",
+            error: err,
+        })
+        return;
+    }
+
+    res.status(200).json(thread)
 })
 
 app.post("/post", async (req, res) => {
