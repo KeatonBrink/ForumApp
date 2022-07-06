@@ -1,5 +1,5 @@
 const express = require('express');
-const {User} = require("../persist/model");
+const {User, Thread} = require("../persist/model");
 const setUpAuth = require("./auth");
 const setUpSession = require("./session");
 const app = express();
@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 //allow serving of UI code
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(`${__dirname}/../public`));
 
 setUpSession(app);
 setUpAuth(app);
@@ -31,6 +31,41 @@ app.post("/user", async (req, res) => {
         });
     }
 });
+
+app.post("/thread", async (req, res) => {
+    if(!req.user) {
+        res.status(401).json({message: "unauthorized"});
+        return;
+    }
+    try {
+        let thread = await Thread.create({
+            user_id: req.user.id,
+            name: req.body.name,
+            description: req.body.description,
+            category: req.body.category
+        });
+        res.status(201).json(thread);
+    } catch (err) {
+        res.status(500).json({message: "could not create thread", error: err,})
+    }
+})
+
+app.get("/thread", (req, res) => {
+    
+})
+
+app.get("/thread/:id", (req, res) => {
+    
+})
+
+app.delete("/thread/:id", (req, res) => {
+
+})
+
+app.post("/post", (req, res) => {
+
+})
+
 
 module.exports = app;
 
