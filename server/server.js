@@ -50,12 +50,35 @@ app.post("/thread", async (req, res) => {
     }
 })
 
-app.get("/thread", (req, res) => {
-    
+app.get("/thread", async (req, res) => {
+    let threads;
+    try {
+        threads = await Thread.find({}, "-posts");
+
+        //Should have worked, but didn't
+        // threads.forEach((indThread) => {
+        //     // console.log(indThread.user_id);
+        //     console.log(User.findById(indThread.user_id));
+        //     indThread.originalPoster = User.findById(indThread.user_id)
+        // })
+        // res.json(threads);
+    } catch(err) {
+        console.log("Could not get threads. Error: ", err);
+    }
+    for (let i in threads) {
+        try {
+            threads[i] = threads[i].toObject();
+            threads[i].user = await User.findById(threads[i].user_id, "-password");
+        } catch(err) {
+            console.log("Error with get thread: ", err);
+        }
+    }
+
+    res.status(200).json(threads)
 })
 
 app.get("/thread/:id", (req, res) => {
-    
+
 })
 
 app.delete("/thread/:id", (req, res) => {

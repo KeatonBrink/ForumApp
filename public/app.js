@@ -131,6 +131,7 @@ var app = new Vue({
 
         //GET threads
         getThreads: async function () {
+            console.log(URL + "/thread")
             let response = await fetch(URL + "/thread", {
                 //Never put body in get request
                 method: "GET",
