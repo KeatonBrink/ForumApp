@@ -1,3 +1,4 @@
+//Connecting all required files
 const express = require('express');
 const {User, Thread} = require("../persist/model");
 const setUpAuth = require("./auth");
@@ -39,6 +40,7 @@ app.post("/user", async (req, res) => {
     }
 });
 
+//Allows the post of thread
 app.post("/thread", async (req, res) => {
     if(!req.user) {
         res.status(401).json({message: "unauthorized"});
@@ -58,6 +60,7 @@ app.post("/thread", async (req, res) => {
     return;
 })
 
+//Gets all threads without posts
 app.get("/thread", async (req, res) => {
     let threads;
     try {
@@ -92,6 +95,7 @@ app.get("/thread", async (req, res) => {
     res.status(200).json(threads)
 })
 
+//Get thread by id
 app.get("/thread/:id", async (req, res) => {
     let threadID = req.params.id
     let threadPosts;
@@ -139,6 +143,7 @@ app.get("/thread/:id", async (req, res) => {
     res.status(200).json(threadPosts);
 });
 
+//Delete thread by id
 app.delete("/thread/:id", async (req, res) => {
     let threadID = req.params.id;
     //Check authentication
@@ -191,6 +196,7 @@ app.delete("/thread/:id", async (req, res) => {
     res.status(200).json(thread)
 })
 
+//Post a post to a thread
 app.post("/post", async (req, res) => {
     if (!req.user) {
         res.status(401).json({message: "Unauthorized"});
@@ -232,6 +238,7 @@ app.post("/post", async (req, res) => {
     res.status(200).json(thread.posts)
 })
 
+//Delete a post from a thread
 app.delete("/thread/:threadid/post/:postid", async (req, res) => {
     let threadID = req.params.threadid;
     let postID = req.params.postid;
@@ -260,20 +267,15 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
     }
     let index = -1;
     let post;
+    //For loop to verify the post can be delted by the user
     for (let i in thread.posts) {
-        // console.log(thread.posts[i]._id, " ", postID)
-        // try {
-        //     postUser = await User.findById(thread.posts[i].user_id);
-        // } catch(err) {
-        //     res.status(500).json({
-        //         message: "Error finding post on thread",
-        //         error: err,
-        //     })
-        //     return;
-        // }
+        //Find the post
         if (thread.posts[i]._id == postID) {
+            //index = -2 for error message check
             index = -2
+            //Ensure correct user id
             if(req.user.id == thread.posts[i].user_id) {
+                //Commit the post index to be deleted
                 post = thread.posts[i];
                 index = i;
             }
@@ -311,8 +313,8 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
         return;
     }
 
-    // delThread = delThread.toObject;
-    res.status(200).json(delThread);
+    // Return deleted post
+    res.status(200).json(post);
 
     //Alternative code to the above code, much simpler, but less specific
 //     try {
@@ -336,13 +338,3 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
 
 
 module.exports = app;
-
-/*
-mondule.exports ={
-    mongo_user: "new_user",
-    mongo_pass: "password",
-    mongo_port: 27018,
-    mongo_port: ,
-    mongo_db: ,
-}
-*/

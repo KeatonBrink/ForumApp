@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+//All database types need a schema with appropriate fields
 const postSchema = mongoose.Schema (
     {
         user_id: {
@@ -46,9 +47,11 @@ const userSchema = mongoose.Schema({
     password: {type: String, required: true}
 });
 
+//These schemas can be used to create models with a specified type
 const User = mongoose.model("User", userSchema);
 const Thread = mongoose.model("Thread", threadSchema)
 
+//Export these models fosho
 module.exports = {
     User,
     Thread,

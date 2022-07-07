@@ -1,6 +1,6 @@
 const app = require("./server/server.js");
 const {connect, onConnect} = require("./persist/connect");
-//This file is missing for security reasons
+//This file is missing from github for security reasons
 const config = require("./config")
 
 onConnect(() => {
@@ -10,7 +10,7 @@ onConnect(() => {
 })
 
 try{
-    //I should really set this up to pass in a password
+    //The mongo user and pass should be safe in the config file, which is not uploaded to github
     connect(config.mongo_user, config.mongo_pass);
     // connect();
 } catch (err) {

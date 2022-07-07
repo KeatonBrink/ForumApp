@@ -4,6 +4,7 @@ const LocalStrategy = require('passport-local');
 const {User} = require("../persist/model.js");
 const app = require('./server.js');
 
+//This stuff is wild, not sure how it works, but I believe is can be copy and pasted
 passport.use(new LocalStrategy(async(username, password, done) => {
     let user;
     try {
@@ -22,11 +23,13 @@ passport.use(new LocalStrategy(async(username, password, done) => {
     }
 }))
 
+//Yeah, go ahead and copy this too
 const setUpAuth = function (app) {
     app.use(passport.initialize());
     app.use(passport.authenticate("session"));
 
     passport.serializeUser(function(user, cb) {
+        //This line scares me
         cb(null, {id: user._id, username: user.username, fullname: user.fullname})
     });
     passport.deserializeUser(function(user, cb) {

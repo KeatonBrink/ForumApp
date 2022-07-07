@@ -9,7 +9,6 @@ const setUpSessionStore = function(app) {
         saveUninitialized: false,
     })
     )
-
 };
 
 module.exports = setUpSessionStore
