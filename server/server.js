@@ -260,21 +260,23 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
     }
     let index = -1;
     let post;
-    let postUser;
     for (let i in thread.posts) {
         // console.log(thread.posts[i]._id, " ", postID)
-        try {
-            postUser = await User.findById(thread.posts[i].user_id);
-        } catch(err) {
-            res.status(500).json({
-                message: "Error finding post on thread",
-                error: err,
-            })
-            return;
-        }
-        if (thread.posts[i]._id == postID && req.user.username == postUser.username) {
-            post = thread.posts[i];
-            index = i;
+        // try {
+        //     postUser = await User.findById(thread.posts[i].user_id);
+        // } catch(err) {
+        //     res.status(500).json({
+        //         message: "Error finding post on thread",
+        //         error: err,
+        //     })
+        //     return;
+        // }
+        if (thread.posts[i]._id == postID) {
+            index = -2
+            if(req.user.id == thread.posts[i].user_id) {
+                post = thread.posts[i];
+                index = i;
+            }
         }
     }
     if (index == -1) {
@@ -282,6 +284,10 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
             message: "Post could not be found"
         })
         return;
+    } else if (index == -2) {
+        res.status(403).json({
+            message: "This user is not the author of the thread."
+        })
     }
 
     let delThread;
