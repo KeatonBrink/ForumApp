@@ -97,6 +97,7 @@
             <button v-else v-on:click="closeThread(threadPosts._id, true)">
               Close thread
             </button>
+            <br />
             <div v-for="post in threadPosts.posts">
               {{post.user.fullname}} said: <br />
               {{post.body}}<br />

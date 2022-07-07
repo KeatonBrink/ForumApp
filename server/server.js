@@ -32,7 +32,7 @@ async function closeTimer() {
         threads = await Thread.find();
         for (let i in threads) {
             console.log("Looking at thread: ", i, " Here is the number for comparison: ", curDate.getTime() - threads[i].updatedAt.getTime());
-            if ((curDate.getTime() - threads[i].updatedAt.getTime() > 5000000) && threads[i].isClosed != true) {
+            if ((curDate.getTime() - threads[i].updatedAt.getTime() > 30000) && threads[i].isClosed != true) {
                 try {
                     await Thread.findByIdAndUpdate(
                         threads[i]._id,
