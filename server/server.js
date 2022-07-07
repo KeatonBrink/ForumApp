@@ -21,6 +21,34 @@ setUpSession(app);
 setUpAuth(app);
 
 
+//This should probably go in another file
+//Interval will close threads after a certain time (50s)
+const closeInterval = setInterval(closeTimer, 10000);
+
+
+async function closeTimer() {
+    let curDate = new Date()
+    try {
+        threads = await Thread.find();
+        for (let i in threads) {
+            console.log("Looking at thread: ", i, " Here is the number for comparison: ", curDate.getTime() - threads[i].updatedAt.getTime());
+            if ((curDate.getTime() - threads[i].updatedAt.getTime() > 50000) && threads[i].isClosed != true) {
+                try {
+                    await Thread.findByIdAndUpdate(
+                        threads[i]._id,
+                        {isClosed: true},
+                    )
+                    console.log("The thread has been modified: ", threads[i]._id)
+                } catch(err) {
+                    console.log(err, "failed to change close post");
+                }
+            }
+        }
+    } catch(err) {
+        console.log("Could not find all threads to for closing", err);
+    }
+}
+
 //How the backend handles a create user request
 app.post("/user", async (req, res) => {
     try {
@@ -58,6 +86,54 @@ app.post("/thread", async (req, res) => {
         res.status(500).json({message: "could not create thread", error: err,})
     }
     return;
+})
+
+app.patch("/thread/:threadid/:closeIt", async (req, res) => {
+    if(!req.user) {
+        res.status(401).json({message: "unauthorized"});
+        return;
+    }
+    let thread;
+    try {
+        thread = await Thread.findById(req.params.threadid);
+        console.log(thread.user_id, " ", req.user.id)
+        if (thread.user_id != req.user.id) {
+            res.status(403).json({
+                message: "The user is not owner of thread"
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(404).json({
+            message: "Thread could not be found",
+            error: err,
+        })
+        return;
+    }
+    try {
+        thread = await Thread.findByIdAndUpdate(
+            req.params.threadid,
+            {isClosed: req.params.closeIt},
+
+            //Return after changes are made
+            {
+                new: true,
+            }
+        )
+        if (!thread) {
+            res.status(404).json({
+                message: "Thread not found"
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: "failed to change close/open post",
+            error: err
+        })
+        return;
+    }
+    res.status(200).json(thread)
 })
 
 //Gets all threads without posts
@@ -203,7 +279,20 @@ app.post("/post", async (req, res) => {
         return;
     }
     let thread;
-
+    try {
+        thread = await Thread.findById(req.body.thread_id);
+        if (thread.isClosed == true) {
+            res.status(403).json({
+                message: "The thread is closed"
+            })
+            return;
+        }
+    } catch(err) {
+        res.status(404).json({
+            message: "The Thread could not be found"
+        })
+        return;
+    }
     try {
         thread = await Thread.findByIdAndUpdate(
             req.body.thread_id,
@@ -288,8 +377,9 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
         return;
     } else if (index == -2) {
         res.status(403).json({
-            message: "This user is not the author of the thread."
+            message: "This user is not the author of the post"
         })
+        return;
     }
 
     let delThread;
@@ -301,9 +391,6 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
                 }
             },
         },
-        {
-            new: true,
-        }
         )
     } catch(err) {
         res.status(500).json({
@@ -315,24 +402,6 @@ app.delete("/thread/:threadid/post/:postid", async (req, res) => {
 
     // Return deleted post
     res.status(200).json(post);
-
-    //Alternative code to the above code, much simpler, but less specific
-//     try {
-//         thread = await Thread.findOne({
-//             _id: threadID,
-//             "posts._id": postID,
-//         })
-//     } catch(err) {
-//         res.status(500).json({
-//             message: "Post could not be found",
-//             error: err,
-//         })
-//     }
-
-//     try {
-        
-//     }
-// }) 
 })
 
 

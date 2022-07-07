@@ -70,6 +70,7 @@
               <h2>{{thread.name}}</h2>
               <h4>{{thread.description}}</h4>
               <h5>By: {{thread.user.fullname}}</h5>
+              <h5 v-show="thread.isClosed == true">Thread Closed</h5>
               <button v-on:click="curPage = 4; getThreadPosts(thread._id)">
                 Open this Thread!
               </button>
@@ -87,6 +88,15 @@
           </div>
           <div v-show="curPage == 4">
             {{threadPosts.name}}
+            <button
+              v-if="threadPosts.isClosed"
+              v-on:click="closeThread(threadPosts._id, false)"
+            >
+              Open thread
+            </button>
+            <button v-else v-on:click="closeThread(threadPosts._id, true)">
+              Close thread
+            </button>
             <div v-for="post in threadPosts.posts">
               {{post.user.fullname}} said: <br />
               {{post.body}}<br />

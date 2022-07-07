@@ -16,7 +16,6 @@ const postSchema = mongoose.Schema (
         },
     },
     {timestamps: true}
-
 );
 
 const threadSchema = mongoose.Schema (
@@ -29,12 +28,11 @@ const threadSchema = mongoose.Schema (
     },
     name: {type: String, required: true, default: ""},
     description: {type: String, required: true, default: ""},
-    posts: { type: [postSchema], required: true, default: []},
     category: {type: String, required: true, default: []},
-},
-{
-    timestamps: true,
-}
+    isClosed: {type: Boolean, required: true, default: false},
+    posts: { type: [postSchema], required: true, default: []},
+    },
+    {timestamps: true}
 )
 
 const userSchema = mongoose.Schema({

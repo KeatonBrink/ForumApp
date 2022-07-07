@@ -228,6 +228,28 @@ var app = new Vue({
             }
         },
 
+        closeThread: async function (threadID, newState) {
+            let newURL = URL + "/thread/" + threadID + "/" + newState;
+            console.log(newURL);
+            let response = await fetch(newURL, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            });
+            if (response.status >= 200 && response.status < 300) {
+                //Succesful update
+                this.curPage = 4;
+                this.getThreadPosts(threadID);
+                console.log("Successful patch attempt");
+            } else if (response.status >= 400) {
+                console.log ("Unsuccesful PATCH /thread")
+            } else {
+                console.log("Some sort of error when PATCH /thread");
+            }
+        },
+
         delThread: async function (threadID) {
             let response = await fetch(URL + "/thread/" + threadID, {
                 method: "DELETE",
